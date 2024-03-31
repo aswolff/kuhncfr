@@ -1,5 +1,6 @@
 import random
 from Player import Player
+import sys
 
 
 class Game:
@@ -75,3 +76,7 @@ class Game:
         for player in self.players:
             player.switch_dealer()
             player.reset_for_new_round()
+            if player.chip_count == 0:
+                sys.exit()
+        self.shuffle_and_deal()
+        

@@ -16,7 +16,7 @@ class Player:
         self.has_folded = True
 
     def call(self, amount: int) -> None:
-        return self.place_bet(amount)
+        return self.bet(amount)
     
     def check(self):
         pass
