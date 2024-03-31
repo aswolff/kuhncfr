@@ -72,6 +72,7 @@ class Game:
         print(f"{winner.name} wins the pot of size {self.pot}")
         # Reset pot and player bet amounts for the next round
         self.pot = 0
+        self.betting_history = []
         self.deck = ['J', 'Q', 'K']
         for player in self.players:
             player.switch_dealer()

@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from Player import Player
 from Game import Game
 import os
+import time
 
 class PokerTable(QMainWindow):
     def __init__(self):
@@ -24,6 +25,12 @@ class PokerTable(QMainWindow):
         self.pot_label = QLabel(f"Pot Size: {self.game.pot}")
         self.general_layout.addWidget(self.pot_label)
 
+        # Winner label setup
+        self.winner_label = QLabel("")
+        self.general_layout.addWidget(self.winner_label)
+        self.winner_label.setAlignment(Qt.AlignCenter)
+        self.winner_label.hide()
+
         # Create the table widget and add it to the layout
         self.table_widget = self._create_table_widget()
         self.general_layout.addWidget(self.table_widget)
@@ -42,6 +49,23 @@ class PokerTable(QMainWindow):
 
         table_widget.setLayout(table_layout)
         return table_widget
+    
+    def display_winner(self):
+        # Display the winner and reveal the opponent's card
+        self.winner_label.setText(f"{self.game.determine_winner()} wins!")
+        self.winner_label.show()
+
+        self.top_player.reveal_hand()
+
+        # Schedule the hiding of the card and label after 1 second
+        QTimer.singleShot(1000, self.reset_for_new_hand)
+
+    def reset_for_new_hand(self):
+        # Hide the winner label
+        self.winner_label.hide()
+
+        # Reset the card displays and any other necessary state
+        self.top_player.hide_card()
     
 class PlayerArea(QWidget):
     def __init__(self, tablegui, game: Game, player: Player):
@@ -83,6 +107,8 @@ class PlayerArea(QWidget):
 
     def check_fold(self):
         if self.game.betting_history:
+            self.reveal_hand()
+            self.tablegui.display_winner()
             self.game.player_fold()
         else:
             self.game.player_check()
@@ -90,6 +116,8 @@ class PlayerArea(QWidget):
 
     def bet_call(self):
         if self.game.betting_history:
+            self.reveal_hand()
+            self.tablegui.display_winner()
             self.game.player_call(1)
         else:
             self.game.player_bet(1)
@@ -100,6 +128,14 @@ class PlayerArea(QWidget):
         self.tablegui.bottom_player.card_label.setPixmap(self.card_images[self.player.hand])
         self.tablegui.top_player.chips_label.setText(f'Chips: {self.tablegui.top_player.player.chip_count}')
         self.tablegui.bottom_player.chips_label.setText(f'Chips: {self.tablegui.bottom_player.player.chip_count}')
+
+    def reveal_hand(self):
+        self.tablegui.top_player.card_label.setPixmap(self.card_images[self.player.hand])
+
+    def hide_card(self):
+        self.tablegui.top_player.card_label.setPixmap(self.card_images['Hidden'])
+    
+
 
 
 
